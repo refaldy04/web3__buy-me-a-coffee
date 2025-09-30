@@ -9,4 +9,4 @@
     - Have a test blockchain that we can call? ✅
   - Get Balance ✅
   - Withdraw ✅
-  - Typescript
+  - Typescript ✅

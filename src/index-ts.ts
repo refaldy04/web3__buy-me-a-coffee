@@ -24,6 +24,9 @@ const balanceButton = document.getElementById(
 const withdrawButton = document.getElementById(
   "withdrawButton"
 ) as HTMLButtonElement;
+const fundedAmountButton = document.getElementById(
+  "fundedAmountButton"
+) as HTMLButtonElement;
 
 console.log("HIIIII");
 // Client variables with type annotations
@@ -156,7 +159,44 @@ async function withdraw(): Promise<void> {
   }
 }
 
+async function getFundedAmount(): Promise<void> {
+  if (typeof window.ethereum !== "undefined") {
+    if (!walletClient) {
+      console.error("Wallet not connected");
+      return;
+    }
+
+    const [connectedAccount] = await walletClient.requestAddresses();
+    if (!connectedAccount) {
+      console.error("No connected account found");
+      return;
+    }
+
+    publicClient = createPublicClient({
+      transport: custom(window.ethereum),
+    });
+
+    try {
+      const fundedAmount = await publicClient.readContract({
+        address: contractAddress,
+        abi,
+        functionName: "getAddressToAmountFunded",
+        args: [connectedAccount], // <-- alamat yang akan dicek
+      });
+
+      console.log(
+        `Address ${connectedAccount} funded: ${formatEther(
+          fundedAmount as bigint
+        )} ETH`
+      );
+    } catch (error) {
+      console.error("Error reading funded amount:", error);
+    }
+  }
+}
+
 // Event listeners with null checks
+if (fundedAmountButton) fundedAmountButton.onclick = getFundedAmount;
 if (connectButton) connectButton.onclick = connect;
 if (fundButton) fundButton.onclick = fund;
 if (balanceButton) balanceButton.onclick = getBalance;
